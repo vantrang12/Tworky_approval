@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="vi">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% if action == 'add' %}Thêm{% elif action == 'edit' %}Sửa{% else %}Chi tiết{% endif %} người dùng - Tworky
+        Approval</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">Tworky Approval</div>
+        <ul class="nav-menu">
+            <li><a href="{{ url_for('dashboard') }}">Trang chủ</a></li>
+            <li><a href="{{ url_for('submissions') }}">Phiếu đề xuất</a></li>
+            <li><a href="{{ url_for('users') }}" class="active">Quản lý người dùng</a></li>
+            <li><a href="{{ url_for('organizations') }}">Quản lý phòng/ban</a></li>
+            <li><a href="{{ url_for('logout') }}">Đăng xuất</a></li>
+        </ul>
+    </nav>
+
+    <div class="container">
+        <div class="page-header">
+            <h1>{% if action == 'add' %}Thêm người dùng mới{% elif action == 'edit' %}Sửa thông tin người dùng{% else
+                %}Chi tiết người dùng{% endif %}</h1>
+            <a href="{{ url_for('users') }}" class="btn btn-secondary">Quay lại</a>
+        </div>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }}">{{ message }}</div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+
+        <div class="form-container">
+            <form method="POST">
+                <div class="form-group">
+                    <label for="username">Tên đăng nhập *</label>
+                    <input type="text" id="username" name="username" value="{{ user.username if user else '' }}"
+                        required {% if action=='view' %}readonly{% endif %}>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Mật khẩu *</label>
+                    <input type="text" id="password" name="password" value="{{ user.password if user else '' }}"
+                        required {% if action=='view' %}readonly{% endif %}>
+                </div>
+
+                <div class="form-group">
+                    <label for="fullname">Họ và tên</label>
+                    <input type="text" id="fullname" name="fullname" value="{{ user.fullname if user else '' }}" {% if
+                        action=='view' %}readonly{% endif %}>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Mô tả</label>
+                    <textarea id="description" name="description" rows="3" {% if action=='view' %}readonly{% endif
+                        %}>{{ user.description if user else '' }}</textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="organization_id">Phòng/ban</label>
+                    <select id="organization_id" name="organization_id" {% if action=='view' %}disabled{% endif %}>
+                        <option value="">-- Chọn phòng/ban --</option>
+                        {% for org in organizations %}
+                        <option value="{{ org.id }}" {% if user and user.organization_id==org.id %}selected{% endif %}>
+                            {{ org.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="role">Vai trò *</label>
+                    <select id="role" name="role" required {% if action=='view' %}disabled{% endif %}>
+                        <option value="user" {% if user and user.role=='user' %}selected{% endif %}>User</option>
+                        <option value="admin" {% if user and user.role=='admin' %}selected{% endif %}>Admin</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="role_approve">Quyền phê duyệt *</label>
+                    <select id="role_approve" name="role_approve" required {% if action=='view' %}disabled{% endif %}>
+                        <option value="normal" {% if user and user.role_approve=='normal' %}selected{% endif %}>Normal
+                        </option>
+                        <option value="approver" {% if user and user.role_approve=='approver' %}selected{% endif %}>
+                            Approver</option>
+                    </select>
+                </div>
+
+                {% if action != 'view' %}
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">{% if action == 'add' %}Thêm{% else %}Cập nhật{% endif
+                        %}</button>
+                    <a href="{{ url_for('users') }}" class="btn btn-secondary">Hủy</a>
+                </div>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</body>
+
+</html>

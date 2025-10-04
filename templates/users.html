@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý người dùng - Tworky Approval</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">Tworky Approval</div>
+        <ul class="nav-menu">
+            <li><a href="{{ url_for('dashboard') }}">Trang chủ</a></li>
+            <li><a href="{{ url_for('submissions') }}">Phiếu đề xuất</a></li>
+            <li><a href="{{ url_for('users') }}" class="active">Quản lý người dùng</a></li>
+            <li><a href="{{ url_for('organizations') }}">Quản lý phòng/ban</a></li>
+            <li><a href="{{ url_for('logout') }}">Đăng xuất</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <div class="page-header">
+            <h1>Quản lý người dùng</h1>
+            <a href="{{ url_for('add_user') }}" class="btn btn-primary">Thêm người dùng</a>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên đăng nhập</th>
+                    <th>Họ và tên</th>
+                    <th>Phòng/ban</th>
+                    <th>Vai trò</th>
+                    <th>Quyền phê duyệt</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.username }}</td>
+                    <td>{{ user.fullname }}</td>
+                    <td>{{ user.organizations.name if user.organizations else 'Chưa có' }}</td>
+                    <td><span class="badge badge-{{ 'success' if user.role == 'admin' else 'secondary' }}">{{ user.role }}</span></td>
+                    <td><span class="badge badge-{{ 'primary' if user.role_approve == 'approver' else 'secondary' }}">{{ user.role_approve }}</span></td>
+                    <td>
+                        <a href="{{ url_for('user_detail', user_id=user.id) }}" class="btn btn-sm btn-info">Chi tiết</a>
+                        <a href="{{ url_for('edit_user', user_id=user.id) }}" class="btn btn-sm btn-warning">Sửa</a>
+                        <form method="POST" action="{{ url_for('delete_user', user_id=user.id) }}" style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn xóa người dùng này?');">
+                            <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</body>
+</html>

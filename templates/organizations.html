@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý phòng/ban - Tworky Approval</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-brand">Tworky Approval</div>
+        <ul class="nav-menu">
+            <li><a href="{{ url_for('dashboard') }}">Trang chủ</a></li>
+            <li><a href="{{ url_for('submissions') }}">Phiếu đề xuất</a></li>
+            <li><a href="{{ url_for('users') }}">Quản lý người dùng</a></li>
+            <li><a href="{{ url_for('organizations') }}" class="active">Quản lý phòng/ban</a></li>
+            <li><a href="{{ url_for('logout') }}">Đăng xuất</a></li>
+        </ul>
+    </nav>
+    
+    <div class="container">
+        <div class="page-header">
+            <h1>Quản lý phòng/ban</h1>
+            <button class="btn btn-primary" onclick="document.getElementById('addModal').style.display='block'">Thêm phòng/ban</button>
+        </div>
+        
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">{{ message }}</div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+        
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Tên phòng/ban</th>
+                    <th>Hành động</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for org in organizations %}
+                <tr>
+                    <td>{{ org.id }}</td>
+                    <td>{{ org.name }}</td>
+                    <td>
+                        <button class="btn btn-sm btn-warning" onclick="openEditModal({{ org.id }}, '{{ org.name }}')">Sửa</button>
+                        <form method="POST" action="{{ url_for('delete_organization', org_id=org.id) }}" style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn xóa phòng/ban này?');">
+                            <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    
+    <!-- Modal Thêm -->
+    <div id="addModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('addModal').style.display='none'">&times;</span>
+            <h2>Thêm phòng/ban mới</h2>
+            <form method="POST" action="{{ url_for('add_organization') }}">
+                <div class="form-group">
+                    <label for="name">Tên phòng/ban *</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Thêm</button>
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('addModal').style.display='none'">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <!-- Modal Sửa -->
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="document.getElementById('editModal').style.display='none'">&times;</span>
+            <h2>Sửa thông tin phòng/ban</h2>
+            <form method="POST" id="editForm">
+                <div class="form-group">
+                    <label for="edit_name">Tên phòng/ban *</label>
+                    <input type="text" id="edit_name" name="name" required>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">Cập nhật</button>
+                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('editModal').style.display='none'">Hủy</button>
+                </div>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        function openEditModal(id, name) {
+            document.getElementById('editForm').action = '/organizations/' + id + '/edit';
+            document.getElementById('edit_name').value = name;
+            document.getElementById('editModal').style.display = 'block';
+        }
+        
+        // Đóng modal khi click bên ngoài
+        window.onclick = function(event) {
+            const addModal = document.getElementById('addModal');
+            const editModal = document.getElementById('editModal');
+            if (event.target == addModal) {
+                addModal.style.display = "none";
+            }
+            if (event.target == editModal) {
+                editModal.style.display = "none";
+            }
+        }
+    </script>
+</body>
+</html>
