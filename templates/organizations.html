@@ -1,37 +1,25 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý phòng/ban - Tworky Approval</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <nav class="navbar">
-        <div class="nav-brand">Tworky Approval</div>
-        <ul class="nav-menu">
-            <li><a href="{{ url_for('dashboard') }}">Trang chủ</a></li>
-            <li><a href="{{ url_for('submissions') }}">Phiếu đề xuất</a></li>
-            <li><a href="{{ url_for('users') }}">Quản lý người dùng</a></li>
-            <li><a href="{{ url_for('organizations') }}" class="active">Quản lý phòng/ban</a></li>
-            <li><a href="{{ url_for('logout') }}">Đăng xuất</a></li>
-        </ul>
-    </nav>
+{% extends "base.html" %}
+
+{% block title %}Quản lý phòng/ban - Tworky Approval{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Quản lý phòng/ban</h1>
+        <button class="btn btn-primary" onclick="openAddModal()">
+            <span>➕</span> Thêm phòng/ban
+        </button>
+    </div>
     
-    <div class="container">
-        <div class="page-header">
-            <h1>Quản lý phòng/ban</h1>
-            <button class="btn btn-primary" onclick="document.getElementById('addModal').style.display='block'">Thêm phòng/ban</button>
-        </div>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="table-container">
         <table class="data-table">
             <thead>
                 <tr>
@@ -45,10 +33,10 @@
                 <tr>
                     <td>{{ org.id }}</td>
                     <td>{{ org.name }}</td>
-                    <td>
-                        <button class="btn btn-sm btn-warning" onclick="openEditModal({{ org.id }}, '{{ org.name }}')">Sửa</button>
-                        <form method="POST" action="{{ url_for('delete_organization', org_id=org.id) }}" style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn xóa phòng/ban này?');">
-                            <button type="submit" class="btn btn-sm btn-danger">Xóa</button>
+                    <td class="action-buttons">
+                        <button class="btn btn-sm btn-warning" onclick="openEditModal({{ org.id }}, '{{ org.name }}')" title="Sửa">✏️ Sửa</button>
+                        <form method="POST" action="{{ url_for('delete_organization', org_id=org.id) }}" style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn xóa phòng/ban {{ org.name }}?');">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Xóa">🗑️ Xóa</button>
                         </form>
                     </td>
                 </tr>
@@ -56,61 +44,81 @@
             </tbody>
         </table>
     </div>
-    
-    <!-- Modal Thêm -->
-    <div id="addModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="document.getElementById('addModal').style.display='none'">&times;</span>
+</div>
+
+<!-- Modal Thêm -->
+<div id="addModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
             <h2>Thêm phòng/ban mới</h2>
-            <form method="POST" action="{{ url_for('add_organization') }}">
-                <div class="form-group">
-                    <label for="name">Tên phòng/ban *</label>
-                    <input type="text" id="name" name="name" required>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Thêm</button>
-                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('addModal').style.display='none'">Hủy</button>
-                </div>
-            </form>
+            <span class="close" onclick="closeModal('addModal')">&times;</span>
         </div>
+        <form method="POST" action="{{ url_for('add_organization') }}">
+            <div class="form-group">
+                <label for="name">Tên phòng/ban <span class="required">*</span></label>
+                <input type="text" id="name" name="name" required autofocus>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">➕ Thêm</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('addModal')">Hủy</button>
+            </div>
+        </form>
     </div>
-    
-    <!-- Modal Sửa -->
-    <div id="editModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="document.getElementById('editModal').style.display='none'">&times;</span>
+</div>
+
+<!-- Modal Sửa -->
+<div id="editModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
             <h2>Sửa thông tin phòng/ban</h2>
-            <form method="POST" id="editForm">
-                <div class="form-group">
-                    <label for="edit_name">Tên phòng/ban *</label>
-                    <input type="text" id="edit_name" name="name" required>
-                </div>
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Cập nhật</button>
-                    <button type="button" class="btn btn-secondary" onclick="document.getElementById('editModal').style.display='none'">Hủy</button>
-                </div>
-            </form>
+            <span class="close" onclick="closeModal('editModal')">&times;</span>
         </div>
+        <form method="POST" id="editForm">
+            <div class="form-group">
+                <label for="edit_name">Tên phòng/ban <span class="required">*</span></label>
+                <input type="text" id="edit_name" name="name" required>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">💾 Cập nhật</button>
+                <button type="button" class="btn btn-secondary" onclick="closeModal('editModal')">Hủy</button>
+            </div>
+        </form>
     </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    function openAddModal() {
+        document.getElementById('addModal').style.display = 'flex';
+        document.getElementById('name').focus();
+    }
     
-    <script>
-        function openEditModal(id, name) {
-            document.getElementById('editForm').action = '/organizations/' + id + '/edit';
-            document.getElementById('edit_name').value = name;
-            document.getElementById('editModal').style.display = 'block';
+    function openEditModal(id, name) {
+        document.getElementById('editForm').action = '/organizations/' + id + '/edit';
+        document.getElementById('edit_name').value = name;
+        document.getElementById('editModal').style.display = 'flex';
+        document.getElementById('edit_name').focus();
+    }
+    
+    function closeModal(modalId) {
+        document.getElementById(modalId).style.display = 'none';
+    }
+    
+    // Đóng modal khi click bên ngoài
+    window.onclick = function(event) {
+        if (event.target.classList.contains('modal')) {
+            event.target.style.display = 'none';
         }
-        
-        // Đóng modal khi click bên ngoài
-        window.onclick = function(event) {
-            const addModal = document.getElementById('addModal');
-            const editModal = document.getElementById('editModal');
-            if (event.target == addModal) {
-                addModal.style.display = "none";
-            }
-            if (event.target == editModal) {
-                editModal.style.display = "none";
-            }
+    }
+    
+    // Đóng modal khi nhấn ESC
+    document.addEventListener('keydown', function(event) {
+        if (event.key === 'Escape') {
+            document.querySelectorAll('.modal').forEach(modal => {
+                modal.style.display = 'none';
+            });
         }
-    </script>
-</body>
-</html>
+    });
+</script>
+{% endblock %}

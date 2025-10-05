@@ -1,39 +1,25 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý phiếu đề xuất - Tworky Approval</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <nav class="navbar">
-        <div class="nav-brand">Tworky Approval</div>
-        <ul class="nav-menu">
-            <li><a href="{{ url_for('dashboard') }}">Trang chủ</a></li>
-            <li><a href="{{ url_for('submissions') }}" class="active">Phiếu đề xuất</a></li>
-            {% if session.role == 'admin' %}
-            <li><a href="{{ url_for('users') }}">Quản lý người dùng</a></li>
-            <li><a href="{{ url_for('organizations') }}">Quản lý phòng/ban</a></li>
-            {% endif %}
-            <li><a href="{{ url_for('logout') }}">Đăng xuất</a></li>
-        </ul>
-    </nav>
+{% extends "base.html" %}
+
+{% block title %}Quản lý phiếu đề xuất - Tworky Approval{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Quản lý phiếu đề xuất</h1>
+        <a href="{{ url_for('add_submission') }}" class="btn btn-primary">
+            <span>➕</span> Tạo phiếu đề xuất
+        </a>
+    </div>
     
-    <div class="container">
-        <div class="page-header">
-            <h1>Quản lý phiếu đề xuất</h1>
-            <a href="{{ url_for('add_submission') }}" class="btn btn-primary">Tạo phiếu đề xuất</a>
-        </div>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="table-container">
         <table class="data-table">
             <thead>
                 <tr>
@@ -51,26 +37,26 @@
                 <tr>
                     <td>{{ submission.id }}</td>
                     <td>{{ submission.organizations.name if submission.organizations else 'N/A' }}</td>
-                    <td>{{ submission.content[:50] }}{% if submission.content|length > 50 %}...{% endif %}</td>
+                    <td class="content-preview">{{ submission.content[:50] }}{% if submission.content|length > 50 %}...{% endif %}</td>
                     <td>{{ submission.users.fullname if submission.users else 'N/A' }}</td>
                     <td>
                         {% if submission.status == 'Chờ phê duyệt' %}
-                            <span class="badge badge-warning">{{ submission.status }}</span>
+                            <span class="badge badge-warning">⏳ {{ submission.status }}</span>
                         {% elif submission.status == 'Đã phê duyệt' %}
-                            <span class="badge badge-success">{{ submission.status }}</span>
+                            <span class="badge badge-success">✓ {{ submission.status }}</span>
                         {% else %}
-                            <span class="badge badge-danger">{{ submission.status }}</span>
+                            <span class="badge badge-danger">✗ {{ submission.status }}</span>
                         {% endif %}
                     </td>
                     <td>{{ submission.created_at[:19] if submission.created_at else 'N/A' }}</td>
-                    <td>
-                        <a href="{{ url_for('submission_detail', submission_id=submission.id) }}" class="btn btn-sm btn-info">Chi tiết</a>
+                    <td class="action-buttons">
+                        <a href="{{ url_for('submission_detail', submission_id=submission.id) }}" class="btn btn-sm btn-info" title="Chi tiết">👁️ Chi tiết</a>
                         {% if session.role_approve == 'approver' and submission.status == 'Chờ phê duyệt' and submission.organization_id == session.organization_id %}
                         <form method="POST" action="{{ url_for('approve_submission', submission_id=submission.id) }}" style="display: inline;">
-                            <button type="submit" class="btn btn-sm btn-success">Phê duyệt</button>
+                            <button type="submit" class="btn btn-sm btn-success" title="Phê duyệt">✓ Duyệt</button>
                         </form>
-                        <form method="POST" action="{{ url_for('reject_submission', submission_id=submission.id) }}" style="display: inline;">
-                            <button type="submit" class="btn btn-sm btn-danger">Từ chối</button>
+                        <form method="POST" action="{{ url_for('reject_submission', submission_id=submission.id) }}" style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn từ chối phiếu này?');">
+                            <button type="submit" class="btn btn-sm btn-danger" title="Từ chối">✗ Từ chối</button>
                         </form>
                         {% endif %}
                     </td>
@@ -79,5 +65,5 @@
             </tbody>
         </table>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

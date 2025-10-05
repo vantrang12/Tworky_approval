@@ -1,66 +1,52 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% if action == 'add' %}Tạo phiếu đề xuất{% else %}Chi tiết phiếu đề xuất{% endif %} - Tworky Approval</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <nav class="navbar">
-        <div class="nav-brand">Tworky Approval</div>
-        <ul class="nav-menu">
-            <li><a href="{{ url_for('dashboard') }}">Trang chủ</a></li>
-            <li><a href="{{ url_for('submissions') }}" class="active">Phiếu đề xuất</a></li>
-            {% if session.role == 'admin' %}
-            <li><a href="{{ url_for('users') }}">Quản lý người dùng</a></li>
-            <li><a href="{{ url_for('organizations') }}">Quản lý phòng/ban</a></li>
-            {% endif %}
-            <li><a href="{{ url_for('logout') }}">Đăng xuất</a></li>
-        </ul>
-    </nav>
+{% extends "base.html" %}
+
+{% block title %}{% if action == 'add' %}Tạo phiếu đề xuất{% else %}Chi tiết phiếu đề xuất{% endif %} - Tworky Approval{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>{% if action == 'add' %}Tạo phiếu đề xuất mới{% else %}Chi tiết phiếu đề xuất #{{ submission.id }}{% endif %}</h1>
+        <a href="{{ url_for('submissions') }}" class="btn btn-secondary">
+            <span>←</span> Quay lại
+        </a>
+    </div>
     
-    <div class="container">
-        <div class="page-header">
-            <h1>{% if action == 'add' %}Tạo phiếu đề xuất mới{% else %}Chi tiết phiếu đề xuất{% endif %}</h1>
-            <a href="{{ url_for('submissions') }}" class="btn btn-secondary">Quay lại</a>
-        </div>
-        
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <div class="form-container">
-            <form method="POST">
-                <div class="form-group">
-                    <label for="organization_id">Phòng/ban xử lý *</label>
-                    <select id="organization_id" name="organization_id" required {% if action == 'view' %}disabled{% endif %}>
-                        <option value="">-- Chọn phòng/ban --</option>
-                        {% for org in organizations %}
-                        <option value="{{ org.id }}" {% if submission and submission.organization_id == org.id %}selected{% endif %}>{{ org.name }}</option>
-                        {% endfor %}
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="content">Nội dung đề xuất *</label>
-                    <textarea id="content" name="content" rows="6" required {% if action == 'view' %}readonly{% endif %}>{{ submission.content if submission else '' }}</textarea>
-                </div>
-                
-                {% if action == 'view' %}
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="form-container">
+        <form method="POST">
+            <div class="form-group">
+                <label for="organization_id">Phòng/ban xử lý <span class="required">*</span></label>
+                <select id="organization_id" name="organization_id" required {% if action == 'view' %}disabled{% endif %}>
+                    <option value="">-- Chọn phòng/ban --</option>
+                    {% for org in organizations %}
+                    <option value="{{ org.id }}" {% if submission and submission.organization_id == org.id %}selected{% endif %}>{{ org.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="content">Nội dung đề xuất <span class="required">*</span></label>
+                <textarea id="content" name="content" rows="8" placeholder="Nhập nội dung đề xuất chi tiết..." required {% if action == 'view' %}readonly{% endif %}>{{ submission.content if submission else '' }}</textarea>
+            </div>
+            
+            {% if action == 'view' %}
+            <div class="form-row">
                 <div class="form-group">
                     <label>Trạng thái</label>
                     <div>
                         {% if submission.status == 'Chờ phê duyệt' %}
-                            <span class="badge badge-warning">{{ submission.status }}</span>
+                            <span class="badge badge-warning badge-large">⏳ {{ submission.status }}</span>
                         {% elif submission.status == 'Đã phê duyệt' %}
-                            <span class="badge badge-success">{{ submission.status }}</span>
+                            <span class="badge badge-success badge-large">✓ {{ submission.status }}</span>
                         {% else %}
-                            <span class="badge badge-danger">{{ submission.status }}</span>
+                            <span class="badge badge-danger badge-large">✗ {{ submission.status }}</span>
                         {% endif %}
                     </div>
                 </div>
@@ -69,32 +55,32 @@
                     <label>Người tạo</label>
                     <input type="text" value="{{ submission.users.fullname if submission.users else 'N/A' }}" readonly>
                 </div>
-                
-                <div class="form-group">
-                    <label>Ngày tạo</label>
-                    <input type="text" value="{{ submission.created_at[:19] if submission.created_at else 'N/A' }}" readonly>
-                </div>
-                
+            </div>
+            
+            <div class="form-group">
+                <label>Ngày tạo</label>
+                <input type="text" value="{{ submission.created_at[:19] if submission.created_at else 'N/A' }}" readonly>
+            </div>
+            
+            <div class="form-actions">
+                <a href="{{ url_for('submissions') }}" class="btn btn-secondary">← Quay lại</a>
                 {% if session.role_approve == 'approver' and submission.status == 'Chờ phê duyệt' and submission.organization_id == session.organization_id %}
-                <div class="form-actions">
-                    <a href="{{ url_for('submissions') }}" class="btn btn-secondary">Quay lại</a>
-                    <form method="POST" action="{{ url_for('approve_submission', submission_id=submission.id) }}" style="display: inline;">
-                        <button type="submit" class="btn btn-success">Phê duyệt</button>
-                    </form>
-                    <form method="POST" action="{{ url_for('reject_submission', submission_id=submission.id) }}" style="display: inline;">
-                        <button type="submit" class="btn btn-danger">Từ chối</button>
-                    </form>
-                </div>
+                <form method="POST" action="{{ url_for('approve_submission', submission_id=submission.id) }}" style="display: inline;">
+                    <button type="submit" class="btn btn-success">✓ Phê duyệt</button>
+                </form>
+                <form method="POST" action="{{ url_for('reject_submission', submission_id=submission.id) }}" style="display: inline;" onsubmit="return confirm('Bạn có chắc muốn từ chối phiếu này?');">
+                    <button type="submit" class="btn btn-danger">✗ Từ chối</button>
+                </form>
                 {% endif %}
-                
-                {% else %}
-                <div class="form-actions">
-                    <button type="submit" class="btn btn-primary">Tạo phiếu đề xuất</button>
-                    <a href="{{ url_for('submissions') }}" class="btn btn-secondary">Hủy</a>
-                </div>
-                {% endif %}
-            </form>
-        </div>
+            </div>
+            
+            {% else %}
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">➕ Tạo phiếu đề xuất</button>
+                <a href="{{ url_for('submissions') }}" class="btn btn-secondary">Hủy</a>
+            </div>
+            {% endif %}
+        </form>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

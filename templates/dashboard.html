@@ -1,67 +1,66 @@
-<!DOCTYPE html>
-<html lang="vi">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Trang chủ - Tworky Approval</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-</head>
-<body>
-    <nav class="navbar">
-        <div class="nav-brand">Tworky Approval</div>
-        <ul class="nav-menu">
-            <li><a href="{{ url_for('dashboard') }}" class="active">Trang chủ</a></li>
-            <li><a href="{{ url_for('submissions') }}">Phiếu đề xuất</a></li>
-            {% if session.role == 'admin' %}
-            <li><a href="{{ url_for('users') }}">Quản lý người dùng</a></li>
-            <li><a href="{{ url_for('organizations') }}">Quản lý phòng/ban</a></li>
-            {% endif %}
-            <li><a href="{{ url_for('logout') }}">Đăng xuất</a></li>
-        </ul>
-    </nav>
+{% extends "base.html" %}
+
+{% block title %}Trang chủ - Tworky Approval{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="page-header">
+        <h1>Chào mừng, {{ user.fullname }}!</h1>
+    </div>
     
-    <div class="container">
-        <div class="page-header">
-            <h1>Chào mừng, {{ user.fullname }}!</h1>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    
+    <div class="dashboard-grid">
+        <div class="dashboard-card card-submissions">
+            <div class="card-icon">📝</div>
+            <h3>Phiếu đề xuất</h3>
+            <p>Quản lý các phiếu đề xuất của bạn</p>
+            <a href="{{ url_for('submissions') }}" class="btn btn-primary">Xem phiếu đề xuất</a>
         </div>
         
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}
-                {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}">{{ message }}</div>
-                {% endfor %}
-            {% endif %}
-        {% endwith %}
-        
-        <div class="dashboard-grid">
-            <div class="dashboard-card">
-                <h3>Phiếu đề xuất</h3>
-                <p>Quản lý các phiếu đề xuất của bạn</p>
-                <a href="{{ url_for('submissions') }}" class="btn btn-primary">Xem phiếu đề xuất</a>
-            </div>
-            
-            {% if session.role == 'admin' %}
-            <div class="dashboard-card">
-                <h3>Quản lý người dùng</h3>
-                <p>Thêm, sửa, xóa người dùng trong hệ thống</p>
-                <a href="{{ url_for('users') }}" class="btn btn-primary">Quản lý người dùng</a>
-            </div>
-            
-            <div class="dashboard-card">
-                <h3>Quản lý phòng/ban</h3>
-                <p>Quản lý các phòng ban trong công ty</p>
-                <a href="{{ url_for('organizations') }}" class="btn btn-primary">Quản lý phòng/ban</a>
-            </div>
-            {% endif %}
+        {% if session.role == 'admin' %}
+        <div class="dashboard-card card-users">
+            <div class="card-icon">👥</div>
+            <h3>Quản lý người dùng</h3>
+            <p>Thêm, sửa, xóa người dùng trong hệ thống</p>
+            <a href="{{ url_for('users') }}" class="btn btn-primary">Quản lý người dùng</a>
         </div>
         
-        <div class="user-info">
-            <h3>Thông tin tài khoản</h3>
-            <p><strong>Tên đăng nhập:</strong> {{ user.username }}</p>
-            <p><strong>Họ và tên:</strong> {{ user.fullname }}</p>
-            <p><strong>Vai trò:</strong> {{ user.role }}</p>
-            <p><strong>Quyền phê duyệt:</strong> {{ user.role_approve }}</p>
+        <div class="dashboard-card card-organizations">
+            <div class="card-icon">🏢</div>
+            <h3>Quản lý phòng/ban</h3>
+            <p>Quản lý các phòng ban trong công ty</p>
+            <a href="{{ url_for('organizations') }}" class="btn btn-primary">Quản lý phòng/ban</a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="user-info-card">
+        <h3>Thông tin tài khoản</h3>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Tên đăng nhập:</span>
+                <span class="info-value">{{ user.username }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Họ và tên:</span>
+                <span class="info-value">{{ user.fullname }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Vai trò:</span>
+                <span class="badge badge-{{ 'success' if user.role == 'admin' else 'secondary' }}">{{ user.role }}</span>
+            </div>
+            <div class="info-item">
+                <span class="info-label">Quyền phê duyệt:</span>
+                <span class="badge badge-{{ 'primary' if user.role_approve == 'approver' else 'secondary' }}">{{ user.role_approve }}</span>
+            </div>
         </div>
     </div>
-</body>
-</html>
+</div>
+{% endblock %}
