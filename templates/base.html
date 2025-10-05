@@ -1,27 +1,33 @@
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
+    <!-- Google Tag Manager -->
+    <script>(function (w, d, s, l, i) {
+            w[l] = w[l] || []; w[l].push({
+                'gtm.start':
+                    new Date().getTime(), event: 'gtm.js'
+            }); var f = d.getElementsByTagName(s)[0],
+                j = d.createElement(s), dl = l != 'dataLayer' ? '&l=' + l : ''; j.async = true; j.src =
+                    'https://www.googletagmanager.com/gtm.js?id=' + i + dl; f.parentNode.insertBefore(j, f);
+        })(window, document, 'script', 'dataLayer', 'GTM-MLVTMR2D');</script>
+    <!-- End Google Tag Manager -->
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="Tworky Approval - Hệ thống quản lý phiếu đề xuất">
     <title>{% block title %}Tworky Approval{% endblock %}</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
-    
-    <!-- Google Analytics -->
-    <!-- Thay GA_MEASUREMENT_ID bằng mã tracking của bạn -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=GA_MEASUREMENT_ID"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
-        gtag('js', new Date());
-        gtag('config', 'GA_MEASUREMENT_ID');
-    </script>
-    <!-- End Google Analytics -->
-    
+
     {% block extra_head %}{% endblock %}
 </head>
+
 <body class="{% block body_class %}{% endblock %}">
-    
+    <!-- Google Tag Manager (noscript) -->
+    <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-MLVTMR2D" height="0" width="0"
+            style="display:none;visibility:hidden"></iframe></noscript>
+    <!-- End Google Tag Manager (noscript) -->
+
     {% block navbar %}
     {% if session.user_id %}
     <nav class="navbar">
@@ -35,11 +41,17 @@
                 <span></span>
             </button>
             <ul class="nav-menu" id="navMenu">
-                <li><a href="{{ url_for('dashboard') }}" class="{% if request.endpoint == 'dashboard' %}active{% endif %}">Trang chủ</a></li>
-                <li><a href="{{ url_for('submissions') }}" class="{% if request.endpoint in ['submissions', 'submission_detail', 'add_submission'] %}active{% endif %}">Phiếu đề xuất</a></li>
+                <li><a href="{{ url_for('dashboard') }}"
+                        class="{% if request.endpoint == 'dashboard' %}active{% endif %}">Trang chủ</a></li>
+                <li><a href="{{ url_for('submissions') }}"
+                        class="{% if request.endpoint in ['submissions', 'submission_detail', 'add_submission'] %}active{% endif %}">Phiếu
+                        đề xuất</a></li>
                 {% if session.role == 'admin' %}
-                <li><a href="{{ url_for('users') }}" class="{% if request.endpoint in ['users', 'user_detail', 'add_user', 'edit_user'] %}active{% endif %}">Người dùng</a></li>
-                <li><a href="{{ url_for('organizations') }}" class="{% if request.endpoint == 'organizations' %}active{% endif %}">Phòng/ban</a></li>
+                <li><a href="{{ url_for('users') }}"
+                        class="{% if request.endpoint in ['users', 'user_detail', 'add_user', 'edit_user'] %}active{% endif %}">Người
+                        dùng</a></li>
+                <li><a href="{{ url_for('organizations') }}"
+                        class="{% if request.endpoint == 'organizations' %}active{% endif %}">Phòng/ban</a></li>
                 {% endif %}
                 <li class="nav-user">
                     <span class="user-info">{{ session.username }}</span>
@@ -50,11 +62,11 @@
     </nav>
     {% endif %}
     {% endblock %}
-    
+
     <main class="main-content">
         {% block content %}{% endblock %}
     </main>
-    
+
     {% block footer %}
     <footer class="footer">
         <div class="container">
@@ -62,19 +74,19 @@
         </div>
     </footer>
     {% endblock %}
-    
+
     <script>
         // Mobile menu toggle
         const navToggle = document.getElementById('navToggle');
         const navMenu = document.getElementById('navMenu');
-        
+
         if (navToggle) {
-            navToggle.addEventListener('click', function() {
+            navToggle.addEventListener('click', function () {
                 navMenu.classList.toggle('active');
                 navToggle.classList.toggle('active');
             });
         }
-        
+
         // Auto-hide alerts after 5 seconds
         const alerts = document.querySelectorAll('.alert');
         alerts.forEach(alert => {
@@ -84,7 +96,8 @@
             }, 5000);
         });
     </script>
-    
+
     {% block extra_js %}{% endblock %}
 </body>
+
 </html>
